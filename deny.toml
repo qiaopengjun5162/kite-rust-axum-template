@@ -1,9 +1,9 @@
 [graph]
+all-features = false
+no-default-features = false
 targets = [
   #"x86_64-unknown-linux-musl",
 ]
-all-features = false
-no-default-features = false
 
 [output]
 feature-depth = 1
@@ -35,24 +35,24 @@ ignore = false
 registries = []
 
 [bans]
-multiple-versions = "warn"
-wildcards = "deny"
-highlight = "all"
-workspace-default-features = "allow"
-external-default-features = "allow"
 allow = []
 allow-workspace = false
 deny = []
+external-default-features = "allow"
+highlight = "all"
+multiple-versions = "warn"
 skip = []
 skip-tree = []
+wildcards = "deny"
+workspace-default-features = "allow"
 
 [sources]
-unknown-registry = "warn"
-unknown-git = "warn"
-allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = []
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+unknown-git = "warn"
+unknown-registry = "warn"
 
 [sources.allow-org]
+bitbucket = []
 github = []
 gitlab = []
-bitbucket = []
