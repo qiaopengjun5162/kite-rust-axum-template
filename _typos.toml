@@ -1,5 +1,2 @@
 [default]
-extend-ignore-re = [
-  "x402-.*",
-  "kite-.*",
-]
+extend-ignore-re = ["x402-.*", "kite-.*"]
