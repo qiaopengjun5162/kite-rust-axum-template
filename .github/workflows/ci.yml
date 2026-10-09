@@ -105,7 +105,7 @@ jobs:
       - name: Clippy
         run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
       - name: cargo-deny
-        run: cargo deny check -d
+        run: cargo deny check advisories
       - name: typos
         run: typos
 

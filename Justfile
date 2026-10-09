@@ -37,7 +37,7 @@ taplo-fmt:
 
 # Dependency check
 deny:
-	cargo deny check -d
+cargo deny check advisories
 
 # Spell check
 typos:

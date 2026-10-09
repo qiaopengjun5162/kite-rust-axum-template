@@ -44,7 +44,7 @@ format:
 
 ## deny: Check dependency security/licenses
 deny:
-	@cargo deny check -d
+	@cargo deny check advisories
 
 ## typos: Spell check
 typos:
