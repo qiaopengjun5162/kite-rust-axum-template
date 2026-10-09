@@ -6,7 +6,7 @@ keywords = ["kite", "x402", "axum", "payment", "stablecoin"]
 license = "MIT"
 name = "kite-rust-axum-template"
 repository = "https://github.com/qiaopengjun5162/kite-rust-axum-template"
-version = "0.1.0"
+version = "0.1.1"
 
 [dependencies]
 # x402 protocol
