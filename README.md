@@ -89,6 +89,32 @@ src/
 | 上游不可用 | 502 Bad Gateway | 502 Bad Gateway | 502 Bad Gateway |
 | 结算时机 | 上游成功时 | 上游成功时 | 上游成功时 |
 
+## 开发
+
+### 前置安装
+
+```bash
+# pre-commit（自动检查提交）
+pip install pre-commit && pre-commit install
+
+# Rust 工具
+cargo install taplo-cli typos-cli cargo-deny cargo-nextest --locked
+```
+
+### CI/CD
+
+| Workflow | 触发 | 说明 |
+| --- | --- | --- |
+| **CI** | push/PR → main | 智能跳过纯文档变更，Rust 变更触发 quality+test 并行 |
+| **PR Agent** | PR open/sync + `/命令` | OpenAI 自动审查代码，ZH-CN 回复 |
+| **Release Please** | merge → main | 按 conventional commit 自动生成版本号 + CHANGELOG + 草稿 Release |
+
+| 本地命令 | 说明 |
+| --- | --- |
+| `make lint` | cargo fmt + clippy + deny + typos |
+| `make test` | cargo test |
+| `make pre-commit` | 手动触发所有 hook |
+
 ## License
 
 MIT
