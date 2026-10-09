@@ -1,36 +1,155 @@
 name: CI
-
 on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: "stable"
 
 jobs:
-  lint:
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      full-check: ${{ steps.detect.outputs.full-check }}
+      rust-check: ${{ steps.detect.outputs.rust-check }}
+      base-sha: ${{ steps.detect.outputs.base-sha }}
+      head-sha: ${{ steps.detect.outputs.head-sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect changed files
+        id: detect
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          event_name="${{ github.event_name }}"
+          base_sha=""
+          head_sha=""
+          if [[ "$event_name" == "pull_request" ]]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            mapfile -t changed < <(git show --name-only --pretty='' "$head_sha" | sed '/^$/d' | sort -u)
+          else
+            git fetch --no-tags --depth=1 origin "$base_sha" || true
+            mapfile -t changed < <(git diff --name-only "$base_sha" "$head_sha" | sort -u)
+          fi
+          full_check=false
+          rust_check=false
+          for file in "${changed[@]}"; do
+            case "$file" in
+              *.md|docs/*)
+                ;;
+              *)
+                full_check=true
+                ;;
+            esac
+            case "$file" in
+              *.rs|Cargo.toml|Cargo.lock|rust-toolchain*)
+                rust_check=true
+                full_check=true
+                ;;
+            esac
+          done
+          echo "changed-files<<EOF" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "${changed[@]}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "full-check=$full_check" >> "$GITHUB_OUTPUT"
+          echo "rust-check=$rust_check" >> "$GITHUB_OUTPUT"
+          echo "base-sha=$base_sha" >> "$GITHUB_OUTPUT"
+          echo "head-sha=$head_sha" >> "$GITHUB_OUTPUT"
+
+  quality:
+    name: Code quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: changes
+    if: ${{ needs.changes.outputs.rust-check == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-          components: clippy
-      - name: Check formatting
-        run: cargo fmt --check
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Install taplo
+        run: cargo install taplo-cli --locked
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --locked
+      - name: Install typos
+        run: cargo install typos-cli --locked
+      - name: Check formatting (Rust)
+        run: cargo fmt --all -- --check
+      - name: Check formatting (TOML)
+        run: taplo fmt --option reorder_keys=true --check
+      - name: Check package errors
+        run: cargo check --all
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
+      - name: cargo-deny
+        run: cargo deny check -d
+      - name: typos
+        run: typos
 
   test:
+    name: Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: changes
+    if: ${{ needs.changes.outputs.rust-check == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+      - uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --verbose --all-features
       - name: Build release
         run: cargo build --release --verbose
+
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [changes, quality, test]
+    if: ${{ always() }}
+    steps:
+      - name: Verify check results
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          RUST_CHECK: ${{ needs.changes.outputs.rust-check }}
+        run: |
+          set -euo pipefail
+          if [[ "$CHANGES_RESULT" != "success" ]]; then
+            echo "changes job failed: $CHANGES_RESULT" >&2; exit 1
+          fi
+          if [[ "$RUST_CHECK" == "true" ]]; then
+            for job in quality test; do
+              result_var="${job^^}_RESULT"
+              if [[ "${!result_var}" != "success" ]]; then
+                echo "$job failed: ${!result_var}" >&2; exit 1
+              fi
+            done
+          fi
+          echo "All checks passed."
