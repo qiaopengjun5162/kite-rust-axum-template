@@ -116,3 +116,4 @@ async fn health_handler() -> impl IntoResponse {
         .to_string(),
     )
 }
+// demo: small improvement
