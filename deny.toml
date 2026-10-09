@@ -1,6 +1,6 @@
 [graph]
 targets = [
-    #"x86_64-unknown-linux-musl",
+  #"x86_64-unknown-linux-musl",
 ]
 all-features = false
 no-default-features = false
@@ -10,22 +10,22 @@ feature-depth = 1
 
 [advisories]
 ignore = [
-    "RUSTSEC-2024-0436", # paste - unmaintained (transitive via alloy-primitives)
+  "RUSTSEC-2024-0436", # paste - unmaintained (transitive via alloy-primitives)
 ]
 
 [licenses]
 allow = [
-    "MIT",
-    "Apache-2.0",
-    "Apache-2.0 WITH LLVM-exception",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
-    "ISC",
-    "Unicode-3.0",
-    "Zlib",
-    "CC0-1.0",
-    "Unlicense",
-    "CDLA-Permissive-2.0", # webpki-root-certs (transitive via reqwest/x402-rs)
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-3.0",
+  "Zlib",
+  "CC0-1.0",
+  "Unlicense",
+  "CDLA-Permissive-2.0",            # webpki-root-certs (transitive via reqwest/x402-rs)
 ]
 confidence-threshold = 0.8
 exceptions = []
