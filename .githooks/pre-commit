@@ -15,6 +15,14 @@ if command -v taplo >/dev/null 2>&1; then
   }
 fi
 
+# Typos check
+if command -v typos >/dev/null 2>&1; then
+  typos 2>/dev/null || {
+    echo "⚠️  typos found spelling errors."
+    exit 1
+  }
+fi
+
 # Cargo check with warnings-as-errors (matches CI)
 RUSTFLAGS="-D warnings" cargo check --all-targets 2>/dev/null || {
   echo "⚠️  cargo check found errors."
