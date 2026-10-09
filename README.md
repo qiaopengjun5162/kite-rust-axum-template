@@ -1,4 +1,7 @@
 # Kite x402 服务模板 (Rust + Axum)
+[![crates.io](https://img.shields.io/crates/v/kite-rust-axum-template)](https://crates.io/crates/kite-rust-axum-template)
+[![CI](https://github.com/qiaopengjun5162/kite-rust-axum-template/actions/workflows/ci.yml/badge.svg)](https://github.com/qiaopengjun5162/kite-rust-axum-template/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 将任意 HTTP API 包装为基于 x402 协议的付费服务，结算在 Kite 链上。
 
@@ -10,6 +13,12 @@
 
 - Rust 1.93+
 - [kpass](https://docs.gokite.ai/) CLI（可选，用于获取钱包地址）
+
+### 从 crates.io 安装（可选）
+
+```bash
+cargo install kite-rust-axum-template
+```
 
 ### 1. 克隆并配置
 
