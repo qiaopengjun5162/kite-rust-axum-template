@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x402 = X402Middleware::new(&facilitator_url);
 
     // Kite price tag — uses V1 exact payment scheme.
-    let price_tag = chain.price_tag(&pay_to, &price.trim_start_matches('$'));
+    let price_tag = chain.price_tag(&pay_to, price.trim_start_matches('$'));
 
     tracing::info!(
         "kite x402 service on :{} -> {} (network {}, {} per call to {})",
