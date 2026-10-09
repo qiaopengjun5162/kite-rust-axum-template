@@ -1,6 +1,5 @@
 #!/bin/sh
 set -e
-export PATH="node_modules/.bin:$PATH"
 
 # Rust formatting check
 cargo fmt --check 2>/dev/null || {
@@ -8,11 +7,16 @@ cargo fmt --check 2>/dev/null || {
   exit 1
 }
 
-# Cargo check (quick)
-cargo check --all 2>/dev/null || {
+# TOML formatting check (taplo)
+if command -v taplo >/dev/null 2>&1; then
+  taplo fmt --option reorder_keys=true --check 2>/dev/null || {
+    echo "⚠️  taplo found unformatted TOML files. Run: taplo fmt --option reorder_keys=true"
+    exit 1
+  }
+fi
+
+# Cargo check with warnings-as-errors (matches CI)
+RUSTFLAGS="-D warnings" cargo check --all-targets 2>/dev/null || {
   echo "⚠️  cargo check found errors."
   exit 1
 }
-
-# Prevent whitespace issues
-git diff --check 2>/dev/null || true

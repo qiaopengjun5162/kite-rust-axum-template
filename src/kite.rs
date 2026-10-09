@@ -13,6 +13,7 @@ pub struct KiteChain {
     /// Human-readable name (`mainnet` or `testnet`).
     pub name: String,
     /// CAIP-2 chain identifier.
+    #[expect(dead_code)]
     pub chain_id: ChainId,
     /// Stablecoin symbol.
     pub asset_symbol: String,

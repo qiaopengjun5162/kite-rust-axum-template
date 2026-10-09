@@ -1,12 +1,12 @@
 [package]
-name = "kite-rust-axum-template"
-version = "0.1.0"
-edition = "2024"
-description = "Kite x402 service template (Rust + Axum) — wraps any HTTP API behind x402 payments on the Kite chain"
 authors = ["Paxon Qiao <qiaopengjun0@gmail.com>"]
-license = "MIT"
-repository = "https://github.com/qiaopengjun5162/kite-rust-axum-template"
+description = "Kite x402 service template (Rust + Axum) — wraps any HTTP API behind x402 payments on the Kite chain"
+edition = "2024"
 keywords = ["kite", "x402", "axum", "payment", "stablecoin"]
+license = "MIT"
+name = "kite-rust-axum-template"
+repository = "https://github.com/qiaopengjun5162/kite-rust-axum-template"
+version = "0.1.0"
 
 [dependencies]
 # x402 protocol
@@ -15,9 +15,9 @@ x402-chain-eip155 = { version = "2.0.2", features = ["server"] }
 x402-types = "2.0.2"
 # Web framework
 axum = "0.8"
+http = "1"
 tower = "0.5"
 tower-http = { version = "0.6", features = ["cors", "trace"] }
-http = "1"
 # HTTP client for proxy
 reqwest = { version = "0.12", default-features = false, features = ["json"] }
 # Serialization

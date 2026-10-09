@@ -1,33 +1,32 @@
 [advisories]
-ignore = [
-]
+ignore = []
 
 [licenses]
-unlicensed = "deny"
 allow = [
-    "MIT",
-    "Apache-2.0",
-    "Apache-2.0 WITH LLVM-exception",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
-    "ISC",
-    "Unicode-3.0",
-    "Zlib",
-    "CC0-1.0",
-    "Unlicense",
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-3.0",
+  "Zlib",
+  "CC0-1.0",
+  "Unlicense",
 ]
 copyleft = "warn"
 default = "deny"
 deny = []
+unlicensed = "deny"
 
 [bans]
-multiple-versions = "warn"
-wildcards = "deny"
 deny = []
+multiple-versions = "warn"
 skip = []
+wildcards = "deny"
 
 [sources]
-unknown-registry = "warn"
-unknown-git = "warn"
-allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = []
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+unknown-git = "warn"
+unknown-registry = "warn"
