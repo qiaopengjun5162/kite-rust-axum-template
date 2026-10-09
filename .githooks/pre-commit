@@ -2,14 +2,17 @@
 set -e
 export PATH="node_modules/.bin:$PATH"
 
-# Rust formatting
+# Rust formatting check
 cargo fmt --check 2>/dev/null || {
   echo "⚠️  cargo fmt found unformatted files. Run: cargo fmt"
   exit 1
 }
 
 # Cargo check (quick)
-cargo check --all 2>/dev/null || exit 1
+cargo check --all 2>/dev/null || {
+  echo "⚠️  cargo check found errors."
+  exit 1
+}
 
 # Prevent whitespace issues
 git diff --check 2>/dev/null || true

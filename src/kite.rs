@@ -3,7 +3,6 @@
 /// Defines the two Kite networks:
 /// - **mainnet** (eip155:2366, USDC.e)
 /// - **testnet** (eip155:2368, pieUSD)
-
 use x402_chain_eip155::{KnownNetworkEip155, V1Eip155Exact};
 use x402_types::chain::ChainId;
 use x402_types::networks::USDC;
@@ -28,8 +27,7 @@ impl KiteChain {
     pub fn price_tag(&self, pay_to: &str, usd: &str) -> x402_types::proto::v1::PriceTag {
         use std::str::FromStr;
         let addr =
-            x402_chain_eip155::chain::types::ChecksummedAddress::from_str(pay_to)
-                .expect("invalid pay_to address");
+            x402_chain_eip155::chain::types::ChecksummedAddress::from_str(pay_to).expect("invalid pay_to address");
         V1Eip155Exact::price_tag(
             addr,
             match self.name.as_str() {

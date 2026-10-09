@@ -9,7 +9,6 @@
 /// ## Environment variables
 ///
 /// See `.env.example` for the full list.
-
 use std::sync::Arc;
 
 use axum::{
@@ -23,8 +22,8 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::EnvFilter;
 use x402_axum::X402Middleware;
 
-mod kite;
 mod env;
+mod kite;
 mod proxy;
 
 use env::env;
@@ -33,10 +32,7 @@ use env::env;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing.
     tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| EnvFilter::new("info")),
-        )
+        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
         .init();
 
     // Load .env file (optional).
@@ -50,11 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let chain = kite::kite_chain_by_name(&env("KITE_NETWORK", "mainnet"));
     let price_raw = env("PRICE_USD", "0.001");
-    let price = if price_raw.starts_with('$') {
-        price_raw.clone()
-    } else {
-        format!("${price_raw}")
-    };
+    let price = if price_raw.starts_with('$') { price_raw.clone() } else { format!("${price_raw}") };
 
     let upstream_url = env("UPSTREAM_URL", "");
     if upstream_url.is_empty() {
@@ -92,10 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route(
             "/v1/*path",
             any(proxy::proxy_handler).layer(
-                x402
-                    .with_price_tag(price_tag)
-                    .with_description(service_desc)
-                    .with_mime_type("application/json".into()),
+                x402.with_price_tag(price_tag).with_description(service_desc).with_mime_type("application/json".into()),
             ),
         )
         // Shared state for the proxy handler.
@@ -105,12 +94,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(CorsLayer::permissive());
 
     // --- Start server ---
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}"))
-        .await
-        .expect("bind failed");
-    axum::serve(listener, app)
-        .await
-        .expect("server failed");
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await.expect("bind failed");
+    axum::serve(listener, app).await.expect("server failed");
 
     Ok(())
 }
@@ -119,11 +104,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn health_handler() -> impl IntoResponse {
     let chain = kite::kite_chain_by_name(&env("KITE_NETWORK", "mainnet"));
     let price_raw = env("PRICE_USD", "0.001");
-    let price = if price_raw.starts_with('$') {
-        price_raw
-    } else {
-        format!("${price_raw}")
-    };
+    let price = if price_raw.starts_with('$') { price_raw } else { format!("${price_raw}") };
     (
         StatusCode::OK,
         serde_json::json!({

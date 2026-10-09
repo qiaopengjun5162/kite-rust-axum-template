@@ -1,3 +1,7 @@
+use axum::body::Body;
+use axum::extract::{Request, State};
+use axum::response::Response;
+use http::{HeaderName, StatusCode, Uri};
 /// Reverse proxy — forwards paid requests to the upstream API.
 ///
 /// Mirrors the upstream proxy logic in the Go/Gin and TypeScript/Express templates:
@@ -5,24 +9,16 @@
 /// - Removes hop-by-hop headers and `PAYMENT-SIGNATURE`.
 /// - Injects the upstream credential (if configured).
 /// - Returns 502 if the upstream is unreachable (prevents settlement).
-
 use std::collections::HashSet;
-use axum::body::Body;
-use axum::extract::{Request, State};
-use axum::response::Response;
-use http::{HeaderName, StatusCode, Uri};
 use std::sync::Arc;
 
 use crate::env::env;
 
 /// Hop-by-hop headers that must not be forwarded.
 fn hop_by_hop() -> HashSet<&'static str> {
-    [
-        "connection", "keep-alive", "transfer-encoding", "te",
-        "trailer", "upgrade", "host", "content-length",
-    ]
-    .into_iter()
-    .collect()
+    ["connection", "keep-alive", "transfer-encoding", "te", "trailer", "upgrade", "host", "content-length"]
+        .into_iter()
+        .collect()
 }
 
 /// Application state shared across handlers.
@@ -60,23 +56,19 @@ pub async fn proxy_handler(
     req: Request<Body>,
 ) -> Result<Response<Body>, (StatusCode, String)> {
     // Build the upstream URL by stripping `/v1` prefix.
-    let path_and_query = req.uri().path_and_query()
+    let path_and_query = req
+        .uri()
+        .path_and_query()
         .map(|pq| {
             let path = pq.path().strip_prefix("/v1").unwrap_or(pq.path());
-            if let Some(query) = pq.query() {
-                format!("{}?{}", path, query)
-            } else {
-                path.to_string()
-            }
+            if let Some(query) = pq.query() { format!("{}?{}", path, query) } else { path.to_string() }
         })
         .unwrap_or_else(|| "/".to_string());
 
-    let upstream_uri: Uri = format!("{}{}", state.upstream_base.as_ref(), path_and_query)
-        .parse()
-        .map_err(|e| {
-            tracing::error!("Invalid upstream URI: {e}");
-            (StatusCode::BAD_GATEWAY, format!("Invalid upstream URI: {e}"))
-        })?;
+    let upstream_uri: Uri = format!("{}{}", state.upstream_base.as_ref(), path_and_query).parse().map_err(|e| {
+        tracing::error!("Invalid upstream URI: {e}");
+        (StatusCode::BAD_GATEWAY, format!("Invalid upstream URI: {e}"))
+    })?;
 
     // Build the upstream request.
     let method = req.method().clone();
@@ -95,9 +87,8 @@ pub async fn proxy_handler(
     // Inject upstream credential.
     let auth_val = state.upstream_auth_value.as_ref();
     if !auth_val.is_empty() {
-        let header_name: HeaderName = state.upstream_auth_header.as_ref()
-            .parse()
-            .unwrap_or(HeaderName::from_static("authorization"));
+        let header_name: HeaderName =
+            state.upstream_auth_header.as_ref().parse().unwrap_or(HeaderName::from_static("authorization"));
         up_req = up_req.header(header_name, auth_val);
     }
 
@@ -105,31 +96,30 @@ pub async fn proxy_handler(
     let method_str = req.method().as_str();
     let has_body = !["GET", "HEAD"].contains(&method_str);
     if has_body {
-        let body_bytes = axum::body::to_bytes(req.into_body(), 1024 * 1024 * 10)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to read body: {e}");
-                (StatusCode::BAD_REQUEST, format!("Body read error: {e}"))
-            })?;
+        let body_bytes = axum::body::to_bytes(req.into_body(), 1024 * 1024 * 10).await.map_err(|e| {
+            tracing::error!("Failed to read body: {e}");
+            (StatusCode::BAD_REQUEST, format!("Body read error: {e}"))
+        })?;
         up_req = up_req.body(body_bytes);
     }
 
     // Execute upstream request.
-    let up_res = state.http_client.execute(up_req.build().map_err(|e| {
-        tracing::error!("Failed to build request: {e}");
-        (StatusCode::BAD_GATEWAY, format!("Request build error: {e}"))
-    })?)
-    .await
-    .map_err(|e| {
-        tracing::error!("Upstream unreachable: {e}");
-        // 502 is >= 400, so the x402 middleware will NOT settle the charge.
-        (StatusCode::BAD_GATEWAY, format!("Upstream unreachable: {e}"))
-    })?;
+    let up_res = state
+        .http_client
+        .execute(up_req.build().map_err(|e| {
+            tracing::error!("Failed to build request: {e}");
+            (StatusCode::BAD_GATEWAY, format!("Request build error: {e}"))
+        })?)
+        .await
+        .map_err(|e| {
+            tracing::error!("Upstream unreachable: {e}");
+            // 502 is >= 400, so the x402 middleware will NOT settle the charge.
+            (StatusCode::BAD_GATEWAY, format!("Upstream unreachable: {e}"))
+        })?;
 
     // Build downstream response.
     let status = up_res.status();
-    let mut response = Response::builder()
-        .status(status);
+    let mut response = Response::builder().status(status);
 
     let hop = hop_by_hop();
     let headers = response.headers_mut().unwrap();
@@ -141,11 +131,10 @@ pub async fn proxy_handler(
     }
 
     let body_bytes = up_res.bytes().await.unwrap_or_default();
-    response.body(Body::from(body_bytes))
-        .map_err(|e| {
-            tracing::error!("Response build error: {e}");
-            (StatusCode::INTERNAL_SERVER_ERROR, format!("Response error: {e}"))
-        })
+    response.body(Body::from(body_bytes)).map_err(|e| {
+        tracing::error!("Response build error: {e}");
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("Response error: {e}"))
+    })
 }
 
 #[cfg(test)]
