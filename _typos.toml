@@ -1,8 +1,2 @@
-[typos]
-default.extend-ignore-re = [
-  # Ignore crate names
-  "x402-.*",
-  "kite-.*",
-]
 [default]
-extend-ignore-identifiers-re = []
+extend-ignore-re = ["x402-.*", "kite-.*"]

@@ -31,7 +31,7 @@ jobs:
       )
     steps:
       - name: Run PR-Agent
-        uses: the-pr-agent/pr-agent@v1
+        uses: Codium-ai/pr-agent@v0.28
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_KEY: ${{ secrets.PR_AGENT_OPENAI_KEY }}

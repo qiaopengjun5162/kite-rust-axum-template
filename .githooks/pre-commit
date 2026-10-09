@@ -10,7 +10,15 @@ cargo fmt --check 2>/dev/null || {
 # TOML formatting check (taplo)
 if command -v taplo >/dev/null 2>&1; then
   taplo fmt --option reorder_keys=true --check 2>/dev/null || {
-    echo "⚠️  taplo found unformatted TOML files. Run: taplo fmt --option reorder_keys=true"
+    echo "⚠️  taplo found unformatted TOML files. Run: taplo fmt"
+    exit 1
+  }
+fi
+
+# Typos check
+if command -v typos >/dev/null 2>&1; then
+  typos 2>/dev/null || {
+    echo "⚠️  typos found spelling errors."
     exit 1
   }
 fi

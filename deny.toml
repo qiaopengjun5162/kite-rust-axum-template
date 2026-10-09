@@ -1,5 +1,17 @@
+[graph]
+all-features = false
+no-default-features = false
+targets = [
+  #"x86_64-unknown-linux-musl",
+]
+
+[output]
+feature-depth = 1
+
 [advisories]
-ignore = []
+ignore = [
+  "RUSTSEC-2024-0436", # paste - unmaintained (transitive via alloy-primitives)
+]
 
 [licenses]
 allow = [
@@ -13,20 +25,34 @@ allow = [
   "Zlib",
   "CC0-1.0",
   "Unlicense",
+  "CDLA-Permissive-2.0",            # webpki-root-certs (transitive via reqwest/x402-rs)
 ]
-copyleft = "warn"
-default = "deny"
-deny = []
-unlicensed = "deny"
+confidence-threshold = 0.8
+exceptions = []
+
+[licenses.private]
+ignore = false
+registries = []
 
 [bans]
+allow = []
+allow-workspace = false
 deny = []
+external-default-features = "allow"
+highlight = "all"
 multiple-versions = "warn"
 skip = []
+skip-tree = []
 wildcards = "deny"
+workspace-default-features = "allow"
 
 [sources]
 allow-git = []
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 unknown-git = "warn"
 unknown-registry = "warn"
+
+[sources.allow-org]
+bitbucket = []
+github = []
+gitlab = []
