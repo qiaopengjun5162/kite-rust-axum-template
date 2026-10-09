@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/qiaopengjun5162/kite-rust-axum-template/compare/v0.1.1...v0.1.2) (2026-10-09)
+
+
+### Documentation
+
+* add crates.io badge and install instructions ([9e3a890](https://github.com/qiaopengjun5162/kite-rust-axum-template/commit/9e3a890747bbc16a8bd8f6d852b3239c9351ae2b))
+
 ## [0.1.1](https://github.com/qiaopengjun5162/kite-rust-axum-template/compare/v0.1.0...v0.1.1) (2026-10-09)
 
 
